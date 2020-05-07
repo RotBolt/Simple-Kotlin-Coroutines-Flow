@@ -1,6 +1,10 @@
 package com.mindorks.coroutines.flow.data.api
 
-class ApiHelper (private val apiService: ApiService){
+import kotlinx.coroutines.flow.flow
 
-    suspend fun getUsers() = apiService.getUsers()
+class ApiHelper(private val apiService: ApiService) {
+
+    fun getUsers() = flow {
+        emit(apiService.getUsers())
+    }
 }

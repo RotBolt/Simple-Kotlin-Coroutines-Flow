@@ -8,6 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.mindorks.coroutines.flow.data.model.User
 import com.mindorks.coroutines.flow.data.repository.MainRepository
 import com.mindorks.coroutines.flow.utils.Resource
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
@@ -22,11 +25,12 @@ class MainViewModel(private val mainRepository: MainRepository) : ViewModel() {
     fun fetchUsers() {
         viewModelScope.launch {
             users.postValue(Resource.loading(null))
-            try {
-                users.postValue(Resource.success(mainRepository.getUsers()))
-            } catch (e: Exception) {
-                users.postValue(Resource.error(null, "Something went wrong"))
-            }
+            mainRepository.getUsers()
+                .catch { e ->
+                    users.postValue(Resource.error(null, e.toString()))
+                }.collect {
+                    users.postValue(Resource.success(it))
+                }
         }
     }
 
